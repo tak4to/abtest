@@ -354,8 +354,8 @@ def plot_comparison(
     color_map = {
         "B is Better": '#ff7f0e',
         "A is Better": '#1f77b4',
-        "Inconclusive": '#gray',
-        "No Difference": '#gray'
+        "Inconclusive": 'gray',
+        "No Difference": 'gray'
     }
     colors = [color_map[r] for r in results]
 
