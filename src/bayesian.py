@@ -8,20 +8,29 @@ from src.results import BayesianResult
 
 class BayesianABTest:
     """
-    ベイジアンA/Bテスト
-    
-    Beta分布を事前分布として使用し、
-    事後分布からモンテカルロサンプリングを行って
-    確率的な推論を行います。
-    
+    ベイジアンA/Bテスト（Beta-Binomial共役モデル）
+
+    Beta分布を事前分布として使用し、二項分布の尤度と組み合わせることで、
+    事後分布が解析的にBeta分布として求まります（共役性）。
+
+    **MCMCが不要な理由:**
+    Beta-Binomial共役性により、事後分布が解析的に求まるため、
+    MCMCやその他の近似手法は不要です。Beta分布から直接サンプリング
+    することで、正確かつ高速に確率的推論を行うことができます。
+
+    **数式:**
+    - 事前分布: p ~ Beta(α_prior, β_prior)
+    - 尤度: conversions ~ Binomial(n, p)
+    - 事後分布: p | data ~ Beta(α_prior + conversions, β_prior + n - conversions)
+
     Attributes
     ----------
     data : TestData
         A/Bテストのデータ
     alpha_prior : float
-        事前分布のαパラメータ
+        事前分布のαパラメータ（デフォルト1.0は無情報事前分布）
     beta_prior : float
-        事前分布のβパラメータ
+        事前分布のβパラメータ（デフォルト1.0は無情報事前分布）
     credible_level : float
         確信水準
     n_samples : int
@@ -142,19 +151,28 @@ class BayesianABTest:
     
     def calculate_bayes_factor(self, prob_b_better: float) -> float:
         """
-        ベイズファクターを計算（簡易版）
-        
-        BF = P(B > A) / P(A > B) として計算します。
-        
+        ベイズファクター（オッズ比）を計算
+
+        注意: この実装は簡易版で、オッズ比 P(B > A) / P(A > B) を計算します。
+        厳密なベイズファクターは、モデル比較 P(Data|H1) / P(Data|H0) ですが、
+        実用上はこのオッズ比が「BがAより優れている」証拠の強さの指標として有用です。
+
+        解釈の目安:
+        - BF < 1: Aが優れている証拠
+        - BF = 1: どちらとも言えない
+        - 1 < BF < 3: Bが優れている弱い証拠
+        - 3 < BF < 10: Bが優れている中程度の証拠
+        - BF > 10: Bが優れている強い証拠
+
         Parameters
         ----------
         prob_b_better : float
             BがAより優れている確率
-        
+
         Returns
         -------
         float
-            ベイズファクター
+            ベイズファクター（オッズ比）
         """
         if prob_b_better == 0:
             return 0.0
