@@ -4,14 +4,21 @@
 
 ## 🚀 クイックスタート
 
-### Streamlitアプリを起動
+### 🌐 オンラインで体験（Pythonのインストール不要）
+
+**Streamlit Community Cloud**でホストされているアプリを直接体験できます！
+URLを知っているだけで、誰でもブラウザから利用できます。
+
+デプロイ方法は下記の「Streamlit Cloudへのデプロイ」セクションを参照してください。
+
+### 💻 ローカルで起動
 
 ```bash
 # 依存関係のインストール
 uv sync
 
 # Streamlitアプリを起動
-uv run streamlit run app.py
+uv run streamlit run scripts/app.py
 ```
 
 ブラウザが自動的に開き、アプリケーションが表示されます。
@@ -98,17 +105,20 @@ uv remove pandas
 
 ```
 .
-├── app.py                 # Streamlitアプリケーション
+├── scripts/
+│   ├── app.py           # Streamlitアプリケーション
+│   ├── main.py          # CLIツール
+│   └── examples.py      # サンプルコード
 ├── src/
 │   ├── bayesian.py       # ベイジアンA/Bテスト
 │   ├── frequentist.py    # 頻度主義A/Bテスト
 │   ├── visualization.py  # 可視化機能
 │   ├── test_data.py      # データ構造定義
 │   └── results.py        # 結果データ構造
-├── scripts/
-│   ├── main.py          # CLIツール
-│   └── examples.py      # サンプルコード
-└── pyproject.toml       # プロジェクト設定
+├── .streamlit/
+│   └── config.toml       # Streamlit設定
+├── requirements.txt      # 依存関係（Streamlit Cloud用）
+└── pyproject.toml        # プロジェクト設定
 ```
 
 ## 🎯 使用例
@@ -130,6 +140,45 @@ uv remove pandas
 - **NumPy/SciPy**: 数値計算・統計計算
 - **Matplotlib/Seaborn**: データ可視化
 - **Pandas**: データ処理
+
+## 🚀 Streamlit Cloudへのデプロイ
+
+Pythonに触れないユーザーでもURLからアクセスして体験できるように、Streamlit Community Cloudにデプロイできます。
+
+### デプロイ手順
+
+1. **GitHubリポジトリを準備**
+   - このリポジトリをGitHubにプッシュ済みであることを確認
+
+2. **Streamlit Community Cloudにアクセス**
+   - [share.streamlit.io](https://share.streamlit.io) にアクセス
+   - GitHubアカウントでログイン
+
+3. **新しいアプリをデプロイ**
+   - "New app" をクリック
+   - リポジトリを選択: `tak4to/abtest`
+   - ブランチを選択: `main` または適切なブランチ
+   - Main file path を入力: `scripts/app.py`
+   - "Deploy" をクリック
+
+4. **デプロイ完了**
+   - 数分でデプロイが完了します
+   - 自動生成されたURLが発行されます（例: `https://abtest-xxx.streamlit.app`）
+   - このURLを共有することで、誰でもアプリを利用できます
+
+### デプロイに必要なファイル
+
+以下のファイルがリポジトリに含まれています：
+
+- `requirements.txt`: 依存関係の定義
+- `scripts/app.py`: Streamlitアプリケーション本体
+- `.streamlit/config.toml`: Streamlit設定（オプション）
+
+### 注意事項
+
+- デプロイは無料ですが、リソース制限があります
+- プライベートリポジトリの場合は、Streamlitに権限を付与する必要があります
+- デプロイ後、アプリは24時間アクティブでない場合、スリープ状態になります
 
 ## 📄 ライセンス
 
