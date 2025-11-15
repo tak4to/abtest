@@ -149,20 +149,182 @@ conv_b = st.sidebar.number_input(
 with st.sidebar.expander("⚙️ 詳細設定"):
     # ベイジアン設定
     st.markdown("**ベイジアン設定**")
-    alpha_prior = st.number_input(
-        "事前分布 α",
-        min_value=0.1,
-        value=1.0,
-        step=0.1,
-        help="Beta分布の事前分布パラメータα"
+
+    # 事前分布の設定方法を選択
+    prior_mode = st.selectbox(
+        "事前分布の設定方法",
+        ["無情報事前分布", "共通設定", "A/B個別設定"],
+        help="""
+        - 無情報事前分布: α=1, β=1 (何も知らない状態)
+        - 共通設定: A/B共通の事前分布を設定
+        - A/B個別設定: グループごとに異なる事前分布を設定
+        """
     )
-    beta_prior = st.number_input(
-        "事前分布 β",
-        min_value=0.1,
-        value=1.0,
-        step=0.1,
-        help="Beta分布の事前分布パラメータβ"
-    )
+
+    if prior_mode == "無情報事前分布":
+        alpha_prior_a = 1.0
+        beta_prior_a = 1.0
+        alpha_prior_b = 1.0
+        beta_prior_b = 1.0
+        st.info("グループA/B共通: α=1.0, β=1.0 (無情報事前分布)")
+
+    elif prior_mode == "共通設定":
+        st.markdown("**共通の事前分布設定**")
+
+        common_prior_type = st.radio(
+            "設定方法",
+            ["パラメータ指定", "データ指定"],
+            horizontal=True
+        )
+
+        if common_prior_type == "パラメータ指定":
+            alpha_prior = st.number_input(
+                "事前分布 α",
+                min_value=0.1,
+                value=1.0,
+                step=0.1,
+                help="Beta分布の事前分布パラメータα"
+            )
+            beta_prior = st.number_input(
+                "事前分布 β",
+                min_value=0.1,
+                value=1.0,
+                step=0.1,
+                help="Beta分布の事前分布パラメータβ"
+            )
+            alpha_prior_a = alpha_prior
+            beta_prior_a = beta_prior
+            alpha_prior_b = alpha_prior
+            beta_prior_b = beta_prior
+        else:  # データ指定
+            prior_n = st.number_input(
+                "事前のサンプル数",
+                min_value=0,
+                value=10,
+                step=1,
+                help="過去のデータや他の情報から得られたサンプル数"
+            )
+            prior_conv = st.number_input(
+                "事前のコンバージョン数",
+                min_value=0,
+                max_value=int(prior_n),
+                value=min(1, int(prior_n)),
+                step=1,
+                help="過去のデータや他の情報から得られたコンバージョン数"
+            )
+
+            alpha_prior_a = prior_conv + 1.0
+            beta_prior_a = (prior_n - prior_conv) + 1.0
+            alpha_prior_b = alpha_prior_a
+            beta_prior_b = beta_prior_a
+
+            prior_mean = prior_conv / prior_n if prior_n > 0 else 0.5
+            st.info(f"α={alpha_prior_a:.1f}, β={beta_prior_a:.1f} (事前平均CVR: {prior_mean:.2%})")
+
+    else:  # A/B個別設定
+        st.markdown("**グループA の事前分布**")
+
+        prior_type_a = st.radio(
+            "グループA 設定方法",
+            ["パラメータ指定", "データ指定"],
+            horizontal=True,
+            key="prior_type_a"
+        )
+
+        if prior_type_a == "パラメータ指定":
+            alpha_prior_a = st.number_input(
+                "グループA α",
+                min_value=0.1,
+                value=1.0,
+                step=0.1,
+                help="グループAのBeta分布パラメータα",
+                key="alpha_a"
+            )
+            beta_prior_a = st.number_input(
+                "グループA β",
+                min_value=0.1,
+                value=1.0,
+                step=0.1,
+                help="グループAのBeta分布パラメータβ",
+                key="beta_a"
+            )
+        else:  # データ指定
+            prior_n_a = st.number_input(
+                "グループA サンプル数",
+                min_value=0,
+                value=10,
+                step=1,
+                help="グループAの事前知識のサンプル数",
+                key="n_a"
+            )
+            prior_conv_a = st.number_input(
+                "グループA コンバージョン数",
+                min_value=0,
+                max_value=int(prior_n_a),
+                value=min(1, int(prior_n_a)),
+                step=1,
+                help="グループAの事前知識のコンバージョン数",
+                key="conv_a"
+            )
+
+            alpha_prior_a = prior_conv_a + 1.0
+            beta_prior_a = (prior_n_a - prior_conv_a) + 1.0
+
+            prior_mean_a = prior_conv_a / prior_n_a if prior_n_a > 0 else 0.5
+            st.info(f"グループA: α={alpha_prior_a:.1f}, β={beta_prior_a:.1f} (事前平均CVR: {prior_mean_a:.2%})")
+
+        st.markdown("---")
+        st.markdown("**グループB の事前分布**")
+
+        prior_type_b = st.radio(
+            "グループB 設定方法",
+            ["パラメータ指定", "データ指定"],
+            horizontal=True,
+            key="prior_type_b"
+        )
+
+        if prior_type_b == "パラメータ指定":
+            alpha_prior_b = st.number_input(
+                "グループB α",
+                min_value=0.1,
+                value=1.0,
+                step=0.1,
+                help="グループBのBeta分布パラメータα",
+                key="alpha_b"
+            )
+            beta_prior_b = st.number_input(
+                "グループB β",
+                min_value=0.1,
+                value=1.0,
+                step=0.1,
+                help="グループBのBeta分布パラメータβ",
+                key="beta_b"
+            )
+        else:  # データ指定
+            prior_n_b = st.number_input(
+                "グループB サンプル数",
+                min_value=0,
+                value=10,
+                step=1,
+                help="グループBの事前知識のサンプル数",
+                key="n_b"
+            )
+            prior_conv_b = st.number_input(
+                "グループB コンバージョン数",
+                min_value=0,
+                max_value=int(prior_n_b),
+                value=min(1, int(prior_n_b)),
+                step=1,
+                help="グループBの事前知識のコンバージョン数",
+                key="conv_b"
+            )
+
+            alpha_prior_b = prior_conv_b + 1.0
+            beta_prior_b = (prior_n_b - prior_conv_b) + 1.0
+
+            prior_mean_b = prior_conv_b / prior_n_b if prior_n_b > 0 else 0.5
+            st.info(f"グループB: α={alpha_prior_b:.1f}, β={beta_prior_b:.1f} (事前平均CVR: {prior_mean_b:.2%})")
+
     credible_level = st.slider(
         "確信水準",
         min_value=0.80,
@@ -237,8 +399,10 @@ try:
         with st.spinner("ベイジアン分析を実行中..."):
             bayesian_test = BayesianABTest(
                 data=data,
-                alpha_prior=alpha_prior,
-                beta_prior=beta_prior,
+                alpha_prior_a=alpha_prior_a,
+                beta_prior_a=beta_prior_a,
+                alpha_prior_b=alpha_prior_b,
+                beta_prior_b=beta_prior_b,
                 credible_level=credible_level,
                 n_samples=100000
             )
@@ -379,8 +543,10 @@ try:
             with st.spinner("ベイジアン分析を実行中..."):
                 bayesian_test = BayesianABTest(
                     data=data,
-                    alpha_prior=alpha_prior,
-                    beta_prior=beta_prior,
+                    alpha_prior_a=alpha_prior_a,
+                    beta_prior_a=beta_prior_a,
+                    alpha_prior_b=alpha_prior_b,
+                    beta_prior_b=beta_prior_b,
                     credible_level=credible_level,
                     n_samples=100000
                 )

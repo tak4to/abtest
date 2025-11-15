@@ -50,6 +50,10 @@ class BayesianABTest:
         data: TestData,
         alpha_prior: float = 1.0,
         beta_prior: float = 1.0,
+        alpha_prior_a: float = None,
+        beta_prior_a: float = None,
+        alpha_prior_b: float = None,
+        beta_prior_b: float = None,
         credible_level: float = 0.95,
         n_samples: int = 100000
     ):
@@ -59,25 +63,42 @@ class BayesianABTest:
         data : TestData
             A/Bテストのデータ
         alpha_prior : float, optional
-            事前分布のαパラメータ（デフォルト: 1.0 = 無情報事前分布）
+            事前分布のαパラメータ（A/B共通、デフォルト: 1.0 = 無情報事前分布）
         beta_prior : float, optional
-            事前分布のβパラメータ（デフォルト: 1.0 = 無情報事前分布）
+            事前分布のβパラメータ（A/B共通、デフォルト: 1.0 = 無情報事前分布）
+        alpha_prior_a : float, optional
+            グループAの事前分布のαパラメータ（指定時はこちらを優先）
+        beta_prior_a : float, optional
+            グループAの事前分布のβパラメータ（指定時はこちらを優先）
+        alpha_prior_b : float, optional
+            グループBの事前分布のαパラメータ（指定時はこちらを優先）
+        beta_prior_b : float, optional
+            グループBの事前分布のβパラメータ（指定時はこちらを優先）
         credible_level : float, optional
             確信水準（デフォルト: 0.95）
         n_samples : int, optional
             モンテカルロシミュレーションのサンプル数（デフォルト: 100000）
         """
         self.data = data
+
+        # A/B個別の事前分布パラメータを設定（指定がなければ共通パラメータを使用）
+        self.alpha_prior_a = alpha_prior_a if alpha_prior_a is not None else alpha_prior
+        self.beta_prior_a = beta_prior_a if beta_prior_a is not None else beta_prior
+        self.alpha_prior_b = alpha_prior_b if alpha_prior_b is not None else alpha_prior
+        self.beta_prior_b = beta_prior_b if beta_prior_b is not None else beta_prior
+
+        # 後方互換性のため
         self.alpha_prior = alpha_prior
         self.beta_prior = beta_prior
+
         self.credible_level = credible_level
         self.n_samples = n_samples
-        
-        # 事後分布のパラメータを計算
-        self.alpha_post_a = alpha_prior + data.conv_a
-        self.beta_post_a = beta_prior + (data.n_a - data.conv_a)
-        self.alpha_post_b = alpha_prior + data.conv_b
-        self.beta_post_b = beta_prior + (data.n_b - data.conv_b)
+
+        # 事後分布のパラメータを計算（A/B個別の事前分布を使用）
+        self.alpha_post_a = self.alpha_prior_a + data.conv_a
+        self.beta_post_a = self.beta_prior_a + (data.n_a - data.conv_a)
+        self.alpha_post_b = self.alpha_prior_b + data.conv_b
+        self.beta_post_b = self.beta_prior_b + (data.n_b - data.conv_b)
     
     def sample_posterior(self) -> Tuple[np.ndarray, np.ndarray]:
         """
