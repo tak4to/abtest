@@ -153,10 +153,9 @@ with st.sidebar.expander("⚙️ 詳細設定"):
     # 事前分布の設定方法を選択
     prior_mode = st.selectbox(
         "事前分布の設定方法",
-        ["無情報事前分布", "共通設定", "A/B個別設定"],
+        ["無情報事前分布", "A/B個別設定"],
         help="""
         - 無情報事前分布: α=1, β=1 (何も知らない状態)
-        - 共通設定: A/B共通の事前分布を設定
         - A/B個別設定: グループごとに異なる事前分布を設定
         """
     )
@@ -167,59 +166,6 @@ with st.sidebar.expander("⚙️ 詳細設定"):
         alpha_prior_b = 1.0
         beta_prior_b = 1.0
         st.info("グループA/B共通: α=1.0, β=1.0 (無情報事前分布)")
-
-    elif prior_mode == "共通設定":
-        st.markdown("**共通の事前分布設定**")
-
-        common_prior_type = st.radio(
-            "設定方法",
-            ["パラメータ指定", "データ指定"],
-            horizontal=True
-        )
-
-        if common_prior_type == "パラメータ指定":
-            alpha_prior = st.number_input(
-                "事前分布 α",
-                min_value=0.1,
-                value=1.0,
-                step=0.1,
-                help="Beta分布の事前分布パラメータα"
-            )
-            beta_prior = st.number_input(
-                "事前分布 β",
-                min_value=0.1,
-                value=1.0,
-                step=0.1,
-                help="Beta分布の事前分布パラメータβ"
-            )
-            alpha_prior_a = alpha_prior
-            beta_prior_a = beta_prior
-            alpha_prior_b = alpha_prior
-            beta_prior_b = beta_prior
-        else:  # データ指定
-            prior_n = st.number_input(
-                "事前のサンプル数",
-                min_value=0,
-                value=10,
-                step=1,
-                help="過去のデータや他の情報から得られたサンプル数"
-            )
-            prior_conv = st.number_input(
-                "事前のコンバージョン数",
-                min_value=0,
-                max_value=int(prior_n),
-                value=min(1, int(prior_n)),
-                step=1,
-                help="過去のデータや他の情報から得られたコンバージョン数"
-            )
-
-            alpha_prior_a = prior_conv + 1.0
-            beta_prior_a = (prior_n - prior_conv) + 1.0
-            alpha_prior_b = alpha_prior_a
-            beta_prior_b = beta_prior_a
-
-            prior_mean = prior_conv / prior_n if prior_n > 0 else 0.5
-            st.info(f"α={alpha_prior_a:.1f}, β={beta_prior_a:.1f} (事前平均CVR: {prior_mean:.2%})")
 
     else:  # A/B個別設定
         st.markdown("**グループA の事前分布**")
@@ -627,65 +573,6 @@ except ValueError as e:
     st.info("左のサイドバーで正しいデータを入力してください。")
 
 # フッター
-st.markdown("---")
-
-col1, col2, col3 = st.columns(3)
-
-with col1:
-    st.markdown("""
-    ### 💡 使い方のヒント
-
-    1. **プリセットから始める**
-       - まずは「明確な差がある例」で動作を確認
-       - 次に「微妙な差がある例」や「差がない例」も試す
-
-    2. **自分のデータで試す**
-       - プリセットを「カスタム」に変更
-       - 実際のA/Bテストデータを入力
-
-    3. **両方の手法を比較**
-       - 「比較」タブで結論の違いを確認
-       - どちらが自分の状況に適しているか考える
-    """)
-
-with col2:
-    st.markdown("""
-    ### 🎓 学習のポイント
-
-    **ベイジアンアプローチ**
-    - 「BがAより良い確率」が直接わかる
-    - 小サンプルでも安定した推論
-    - 事前知識を活用できる
-
-    **頻度主義アプローチ**
-    - 広く使われている標準的な手法
-    - p値による明確な判定基準
-    - 大サンプルで信頼性が高い
-
-    **どちらを使うべき？**
-    - 迷ったら両方見て総合判断！
-    """)
-
-with col3:
-    st.markdown("""
-    ### 📊 実践例
-
-    **ECサイトのボタン色**
-    - A: 青ボタン（1000訪問、100購入）
-    - B: 赤ボタン（1000訪問、120購入）
-    - → Bの方が良さそう？統計的に有意？
-
-    **メールの件名テスト**
-    - A: 通常件名（500送信、50開封）
-    - B: 新件名（500送信、65開封）
-    - → 差があると言えるか？
-
-    **広告クリエイティブ**
-    - A: 画像A（10000表示、200クリック）
-    - B: 画像B（10000表示、215クリック）
-    - → わずかな差でも意味がある？
-    """)
-
 st.markdown("---")
 
 st.markdown("""
