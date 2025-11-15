@@ -1,5 +1,10 @@
 import sys
-sys.path.append('..')
+from pathlib import Path
+
+# プロジェクトのルートディレクトリをパスに追加
+root_dir = Path(__file__).parent.parent
+sys.path.insert(0, str(root_dir))
+
 import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
@@ -22,18 +27,50 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# タイトル
+# タイトルとイントロダクション
 st.title("📊 A/Bテスト分析ツール")
+
+# イントロダクション
 st.markdown("""
-このツールでは、ベイジアンA/Bテストと頻度主義A/Bテストの両方を体験できます。
-左のサイドバーでデータを入力し、各タブで結果を確認してください。
-""")
+<div style="background-color: #f0f2f6; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+    <h3 style="color: #1f77b4; margin-top: 0;">👋 ようこそ！</h3>
+    <p style="font-size: 16px; line-height: 1.6;">
+        このツールでは、<b>ベイジアンA/Bテスト</b>と<b>頻度主義A/Bテスト</b>の両方を体験できます。<br>
+        左のサイドバーでデータを入力するか、プリセットを選択して、すぐに分析を開始できます。
+    </p>
+    <details>
+        <summary style="cursor: pointer; color: #1f77b4; font-weight: bold;">📖 A/Bテストとは？</summary>
+        <p style="margin-top: 10px; line-height: 1.6;">
+            A/Bテストは、2つのバージョン（AとB）を比較して、どちらがより優れているかを判定する統計的手法です。<br>
+            例えば、Webサイトの2つのデザインのうち、どちらがより多くのコンバージョンを生み出すかを判定できます。
+        </p>
+    </details>
+    <details style="margin-top: 10px;">
+        <summary style="cursor: pointer; color: #1f77b4; font-weight: bold;">🎯 このツールの使い方</summary>
+        <ol style="margin-top: 10px; line-height: 1.6;">
+            <li><b>プリセットを選択</b>: 左のサイドバーでサンプルデータを選択</li>
+            <li><b>データを入力</b>: または、自分のデータを入力</li>
+            <li><b>結果を確認</b>: 3つのタブで異なる分析結果を確認</li>
+            <li><b>比較</b>: ベイジアンと頻度主義の違いを理解</li>
+        </ol>
+    </details>
+</div>
+""", unsafe_allow_html=True)
 
 # サイドバー: データ入力
 st.sidebar.header("🔧 データ設定")
 
+st.sidebar.markdown("""
+<div style="background-color: #e8f4f8; padding: 10px; border-radius: 5px; margin-bottom: 15px;">
+    <p style="margin: 0; font-size: 14px;">
+        💡 <b>初めての方へ</b><br>
+        まずは「明確な差がある例」を選択して、どんな分析ができるか試してみましょう！
+    </p>
+</div>
+""", unsafe_allow_html=True)
+
 # サンプルデータのプリセット
-st.sidebar.subheader("プリセット")
+st.sidebar.subheader("📋 プリセット")
 preset = st.sidebar.selectbox(
     "サンプルデータを選択",
     [
@@ -42,7 +79,8 @@ preset = st.sidebar.selectbox(
         "微妙な差がある例",
         "差がない例",
         "小サンプルの例"
-    ]
+    ],
+    help="様々なシナリオのサンプルデータを選択できます。初めての方は「明確な差がある例」がおすすめです。"
 )
 
 # プリセットの値を設定
@@ -73,13 +111,13 @@ else:  # カスタム
     default_conv_b = 120
 
 # データ入力
-st.sidebar.subheader("グループA")
+st.sidebar.subheader("🅰️ グループA (現行版)")
 n_a = st.sidebar.number_input(
     "サンプルサイズ (グループA)",
     min_value=1,
     value=default_n_a,
     step=1,
-    help="グループAの訪問者数"
+    help="グループAの訪問者数（例：Webサイトの訪問者数、広告の表示回数など）"
 )
 conv_a = st.sidebar.number_input(
     "コンバージョン数 (グループA)",
@@ -87,16 +125,16 @@ conv_a = st.sidebar.number_input(
     max_value=int(n_a),
     value=min(default_conv_a, int(n_a)),
     step=1,
-    help="グループAのコンバージョン数"
+    help="グループAのコンバージョン数（例：購入数、クリック数など）"
 )
 
-st.sidebar.subheader("グループB")
+st.sidebar.subheader("🅱️ グループB (新バージョン)")
 n_b = st.sidebar.number_input(
     "サンプルサイズ (グループB)",
     min_value=1,
     value=default_n_b,
     step=1,
-    help="グループBの訪問者数"
+    help="グループBの訪問者数（例：Webサイトの訪問者数、広告の表示回数など）"
 )
 conv_b = st.sidebar.number_input(
     "コンバージョン数 (グループB)",
@@ -104,7 +142,7 @@ conv_b = st.sidebar.number_input(
     max_value=int(n_b),
     value=min(default_conv_b, int(n_b)),
     step=1,
-    help="グループBのコンバージョン数"
+    help="グループBのコンバージョン数（例：購入数、クリック数など）"
 )
 
 # 詳細設定
@@ -424,13 +462,71 @@ except ValueError as e:
 
 # フッター
 st.markdown("---")
+
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    st.markdown("""
+    ### 💡 使い方のヒント
+
+    1. **プリセットから始める**
+       - まずは「明確な差がある例」で動作を確認
+       - 次に「微妙な差がある例」や「差がない例」も試す
+
+    2. **自分のデータで試す**
+       - プリセットを「カスタム」に変更
+       - 実際のA/Bテストデータを入力
+
+    3. **両方の手法を比較**
+       - 「比較」タブで結論の違いを確認
+       - どちらが自分の状況に適しているか考える
+    """)
+
+with col2:
+    st.markdown("""
+    ### 🎓 学習のポイント
+
+    **ベイジアンアプローチ**
+    - 「BがAより良い確率」が直接わかる
+    - 小サンプルでも安定した推論
+    - 事前知識を活用できる
+
+    **頻度主義アプローチ**
+    - 広く使われている標準的な手法
+    - p値による明確な判定基準
+    - 大サンプルで信頼性が高い
+
+    **どちらを使うべき？**
+    - 迷ったら両方見て総合判断！
+    """)
+
+with col3:
+    st.markdown("""
+    ### 📊 実践例
+
+    **ECサイトのボタン色**
+    - A: 青ボタン（1000訪問、100購入）
+    - B: 赤ボタン（1000訪問、120購入）
+    - → Bの方が良さそう？統計的に有意？
+
+    **メールの件名テスト**
+    - A: 通常件名（500送信、50開封）
+    - B: 新件名（500送信、65開封）
+    - → 差があると言えるか？
+
+    **広告クリエイティブ**
+    - A: 画像A（10000表示、200クリック）
+    - B: 画像B（10000表示、215クリック）
+    - → わずかな差でも意味がある？
+    """)
+
+st.markdown("---")
+
 st.markdown("""
-### 💡 使い方のヒント
-1. **プリセット**を選択して、様々なシナリオを試してみましょう
-2. **詳細設定**で、事前分布や検定方法を変更できます
-3. 各タブで異なるアプローチの結果を確認し、比較してみましょう
-4. 小サンプルと大サンプルで結果がどう変わるか試してみましょう
-### 📚 参考資料
-- [ベイジアン統計学入門](https://www.example.com)
-- [統計的仮説検定の基礎](https://www.example.com)
-""")
+<div style="text-align: center; padding: 20px; background-color: #f0f2f6; border-radius: 10px;">
+    <p style="margin: 0; color: #666;">
+        このツールはオープンソースです。フィードバックや改善提案をお待ちしています！<br>
+        <small>Powered by Streamlit | ベイジアンA/Bテスト & 頻度主義A/Bテスト</small>
+    </p>
+</div>
+""", unsafe_allow_html=True)
