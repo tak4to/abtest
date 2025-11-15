@@ -149,20 +149,62 @@ conv_b = st.sidebar.number_input(
 with st.sidebar.expander("⚙️ 詳細設定"):
     # ベイジアン設定
     st.markdown("**ベイジアン設定**")
-    alpha_prior = st.number_input(
-        "事前分布 α",
-        min_value=0.1,
-        value=1.0,
-        step=0.1,
-        help="Beta分布の事前分布パラメータα"
+
+    # 事前分布の設定方法を選択
+    prior_mode = st.selectbox(
+        "事前分布の設定方法",
+        ["無情報事前分布", "パラメータ指定", "データ指定"],
+        help="""
+        - 無情報事前分布: α=1, β=1 (何も知らない状態)
+        - パラメータ指定: αとβを直接指定
+        - データ指定: サンプル数とコンバージョン数から計算
+        """
     )
-    beta_prior = st.number_input(
-        "事前分布 β",
-        min_value=0.1,
-        value=1.0,
-        step=0.1,
-        help="Beta分布の事前分布パラメータβ"
-    )
+
+    if prior_mode == "無情報事前分布":
+        alpha_prior = 1.0
+        beta_prior = 1.0
+        st.info("α=1.0, β=1.0 (無情報事前分布)")
+    elif prior_mode == "パラメータ指定":
+        alpha_prior = st.number_input(
+            "事前分布 α",
+            min_value=0.1,
+            value=1.0,
+            step=0.1,
+            help="Beta分布の事前分布パラメータα"
+        )
+        beta_prior = st.number_input(
+            "事前分布 β",
+            min_value=0.1,
+            value=1.0,
+            step=0.1,
+            help="Beta分布の事前分布パラメータβ"
+        )
+    else:  # データ指定
+        st.markdown("**事前知識のデータ**")
+        prior_n = st.number_input(
+            "事前のサンプル数",
+            min_value=0,
+            value=10,
+            step=1,
+            help="過去のデータや他の情報から得られたサンプル数"
+        )
+        prior_conv = st.number_input(
+            "事前のコンバージョン数",
+            min_value=0,
+            max_value=int(prior_n),
+            value=min(1, int(prior_n)),
+            step=1,
+            help="過去のデータや他の情報から得られたコンバージョン数"
+        )
+
+        # データからalphaとbetaを計算
+        alpha_prior = prior_conv + 1.0
+        beta_prior = (prior_n - prior_conv) + 1.0
+
+        prior_mean = prior_conv / prior_n if prior_n > 0 else 0.5
+        st.info(f"α={alpha_prior:.1f}, β={beta_prior:.1f} (事前平均CVR: {prior_mean:.2%})")
+
     credible_level = st.slider(
         "確信水準",
         min_value=0.80,

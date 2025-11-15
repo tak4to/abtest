@@ -53,7 +53,7 @@ def plot_bayesian_distributions(
         matplotlibのfigureオブジェクト
     """
     fig = plt.figure(figsize=figsize)
-    gs = fig.add_gridspec(3, 3, hspace=0.3, wspace=0.3)
+    gs = fig.add_gridspec(3, 3, hspace=0.4, wspace=0.35)
 
     # 1. 事後分布のプロット（大きめに）
     ax1 = fig.add_subplot(gs[0:2, 0:2])
@@ -209,7 +209,7 @@ def plot_bayesian_distributions(
 """
 
     ax4.text(0.05, 0.95, summary_text, transform=ax4.transAxes,
-            fontsize=10, verticalalignment='top', fontfamily='monospace',
+            fontsize=10, verticalalignment='top',
             bbox=dict(boxstyle='round', facecolor='#f8f9fa', alpha=0.9,
                      edgecolor=conclusion_color, linewidth=2))
 
@@ -377,7 +377,7 @@ def plot_frequentist_results(
 """
 
     ax3.text(0.05, 0.95, summary_text, transform=ax3.transAxes,
-            fontsize=9.5, verticalalignment='top', fontfamily='monospace',
+            fontsize=9.5, verticalalignment='top',
             bbox=dict(boxstyle='round', facecolor='#f8f9fa', alpha=0.9,
                      edgecolor=sig_color, linewidth=2))
 
@@ -615,7 +615,7 @@ def plot_comparison(
 """
 
     ax4.text(0.05, 0.95, summary_text, transform=ax4.transAxes,
-            fontsize=10, verticalalignment='top', fontfamily='monospace',
+            fontsize=10, verticalalignment='top',
             bbox=dict(boxstyle='round', facecolor='#f8f9fa', alpha=0.9,
                      edgecolor=agreement_color, linewidth=2))
 
