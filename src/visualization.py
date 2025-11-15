@@ -53,7 +53,7 @@ def plot_bayesian_distributions(
         matplotlibのfigureオブジェクト
     """
     fig = plt.figure(figsize=figsize)
-    gs = fig.add_gridspec(3, 3, hspace=0.4, wspace=0.35)
+    gs = fig.add_gridspec(3, 3, hspace=0.5, wspace=0.4)
 
     # 1. 事後分布のプロット（大きめに）
     ax1 = fig.add_subplot(gs[0:2, 0:2])
@@ -83,8 +83,8 @@ def plot_bayesian_distributions(
 
     ax1.set_xlabel('コンバージョン率', fontsize=13, fontweight='bold')
     ax1.set_ylabel('確率密度', fontsize=13, fontweight='bold')
-    ax1.set_title('事後分布の比較 (ベータ分布)', fontsize=15, fontweight='bold', pad=15)
-    ax1.legend(fontsize=11, loc='best', framealpha=0.9)
+    ax1.set_title('事後分布の比較 (ベータ分布)', fontsize=14, fontweight='bold', pad=20)
+    ax1.legend(fontsize=10, loc='best', framealpha=0.9)
     ax1.grid(True, alpha=0.3, linestyle=':')
 
     # 2. 差の分布のプロット
@@ -125,8 +125,8 @@ def plot_bayesian_distributions(
 
     ax2.set_xlabel('CVRの差 (B - A)', fontsize=13, fontweight='bold')
     ax2.set_ylabel('確率密度', fontsize=13, fontweight='bold')
-    ax2.set_title('差の分布 (B - A)', fontsize=15, fontweight='bold', pad=15)
-    ax2.legend(fontsize=10, loc='best', framealpha=0.9)
+    ax2.set_title('差の分布 (B - A)', fontsize=14, fontweight='bold', pad=20)
+    ax2.legend(fontsize=9, loc='best', framealpha=0.9)
     ax2.grid(True, alpha=0.3, linestyle=':')
 
     # 3. 確率の可視化（円グラフ）
@@ -152,9 +152,9 @@ def plot_bayesian_distributions(
     # パーセント表示を白色に
     for autotext in autotexts:
         autotext.set_color('white')
-        autotext.set_fontsize(12)
+        autotext.set_fontsize(11)
 
-    ax3.set_title('どちらが優位か？', fontsize=13, fontweight='bold', pad=15)
+    ax3.set_title('どちらが優位か？', fontsize=13, fontweight='bold', pad=20)
 
     # 4. 統計サマリー（より視覚的に）
     ax4 = fig.add_subplot(gs[1:, 2])
@@ -209,7 +209,7 @@ def plot_bayesian_distributions(
 """
 
     ax4.text(0.05, 0.95, summary_text, transform=ax4.transAxes,
-            fontsize=10, verticalalignment='top',
+            fontsize=9, verticalalignment='top',
             bbox=dict(boxstyle='round', facecolor='#f8f9fa', alpha=0.9,
                      edgecolor=conclusion_color, linewidth=2))
 
@@ -273,7 +273,7 @@ def plot_frequentist_results(
                  color='black', capsize=12, capthick=2.5, linewidth=2.5, alpha=0.7)
 
     ax1.set_ylabel('コンバージョン率', fontsize=13, fontweight='bold')
-    ax1.set_title('CVR比較 (信頼区間付き)', fontsize=15, fontweight='bold', pad=15)
+    ax1.set_title('CVR比較 (信頼区間付き)', fontsize=14, fontweight='bold', pad=20)
     ax1.grid(True, alpha=0.3, axis='y', linestyle=':')
 
     # バーに値を表示
@@ -312,7 +312,7 @@ def plot_frequentist_results(
     ax2.axhline(alpha, color='red', linestyle='--', linewidth=2, alpha=0.5, label='有意水準')
 
     ax2.set_ylabel('値', fontsize=13, fontweight='bold')
-    ax2.set_title('統計的有意性の判定', fontsize=15, fontweight='bold', pad=15)
+    ax2.set_title('統計的有意性の判定', fontsize=14, fontweight='bold', pad=20)
     ax2.set_ylim([0, max(y_values) * 1.3])
     ax2.grid(True, alpha=0.3, axis='y', linestyle=':')
 
@@ -377,7 +377,7 @@ def plot_frequentist_results(
 """
 
     ax3.text(0.05, 0.95, summary_text, transform=ax3.transAxes,
-            fontsize=9.5, verticalalignment='top',
+            fontsize=9, verticalalignment='top',
             bbox=dict(boxstyle='round', facecolor='#f8f9fa', alpha=0.9,
                      edgecolor=sig_color, linewidth=2))
 
@@ -462,8 +462,8 @@ def plot_comparison(
 
     ax1.set_xlabel('CVRの差 (B - A)', fontsize=13, fontweight='bold')
     ax1.set_ylabel('確率密度', fontsize=13, fontweight='bold')
-    ax1.set_title('区間の比較: ベイジアン vs 頻度主義', fontsize=16, fontweight='bold', pad=15)
-    ax1.legend(fontsize=10, loc='best', framealpha=0.9)
+    ax1.set_title('区間の比較: ベイジアン vs 頻度主義', fontsize=14, fontweight='bold', pad=20)
+    ax1.legend(fontsize=9, loc='best', framealpha=0.9)
     ax1.grid(True, alpha=0.3, linestyle=':')
 
     # 2. 結論の比較（改善版）
@@ -510,7 +510,7 @@ def plot_comparison(
     ax2.set_yticklabels(conclusions, fontsize=12, fontweight='bold')
     ax2.set_xlim([0, 1])
     ax2.set_xticks([])
-    ax2.set_title('結論の比較', fontsize=14, fontweight='bold', pad=15)
+    ax2.set_title('結論の比較', fontsize=13, fontweight='bold', pad=20)
     ax2.spines['top'].set_visible(False)
     ax2.spines['right'].set_visible(False)
     ax2.spines['bottom'].set_visible(False)
@@ -560,11 +560,11 @@ def plot_comparison(
                 color='white', rotation=0)
 
     ax3.set_xticks(x_pos)
-    ax3.set_xticklabels(metrics, fontsize=12, fontweight='bold')
+    ax3.set_xticklabels(metrics, fontsize=11, fontweight='bold')
     ax3.set_ylim([0, 1.2])
     ax3.set_yticks([])
-    ax3.set_title('メトリクスの比較', fontsize=15, fontweight='bold', pad=15)
-    ax3.legend(fontsize=11, loc='upper right')
+    ax3.set_title('メトリクスの比較', fontsize=13, fontweight='bold', pad=20)
+    ax3.legend(fontsize=10, loc='upper right')
     ax3.spines['top'].set_visible(False)
     ax3.spines['right'].set_visible(False)
     ax3.spines['left'].set_visible(False)
@@ -615,7 +615,7 @@ def plot_comparison(
 """
 
     ax4.text(0.05, 0.95, summary_text, transform=ax4.transAxes,
-            fontsize=10, verticalalignment='top',
+            fontsize=9, verticalalignment='top',
             bbox=dict(boxstyle='round', facecolor='#f8f9fa', alpha=0.9,
                      edgecolor=agreement_color, linewidth=2))
 
