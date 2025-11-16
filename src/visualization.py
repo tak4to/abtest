@@ -15,20 +15,9 @@ from src.bayesian import BayesianABTest
 from src.frequentist import FrequentistABTest
 
 
-# 日本語フォント設定（Streamlit Cloud対応）
+# 日本語フォント設定（Streamlit Cloud対応・改善版）
 def setup_japanese_font():
-    """日本語フォントを設定する"""
-
-    # matplotlibのフォントキャッシュディレクトリをクリア（初回のみ）
-    cache_dir = matplotlib.get_cachedir()
-    if os.path.exists(cache_dir):
-        try:
-            # キャッシュが空でない場合のみクリア
-            if os.listdir(cache_dir):
-                shutil.rmtree(cache_dir)
-                fm._rebuild()
-        except:
-            pass
+    """日本語フォントを設定する（seabornベース）"""
 
     # 日本語フォントのパスを検索
     font_paths = [
@@ -36,6 +25,8 @@ def setup_japanese_font():
         '/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc',
         '/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc',
         '/usr/share/fonts/truetype/noto/NotoSansCJK-Bold.ttc',
+        '/System/Library/Fonts/ヒラギノ角ゴシック W4.ttc',  # macOS
+        'C:\\Windows\\Fonts\\msgothic.ttc',  # Windows
     ]
 
     font_file = None
@@ -44,35 +35,46 @@ def setup_japanese_font():
             font_file = font_path
             break
 
+    # matplotlibのフォント設定
     if font_file:
-        # フォントを直接登録
         try:
-            fm.fontManager.addfont(font_file)
+            # フォントを登録
+            if hasattr(fm.fontManager, 'addfont'):
+                fm.fontManager.addfont(font_file)
             font_prop = fm.FontProperties(fname=font_file)
             font_name = font_prop.get_name()
 
-            # matplotlibのデフォルトフォントとして設定
-            plt.rcParams['font.family'] = font_name
-            plt.rcParams['font.sans-serif'] = [font_name] + plt.rcParams['font.sans-serif']
-        except:
-            # 既に登録済みの場合はスキップ
-            pass
+            # seabornとmatplotlibの設定を統合
+            plt.rcParams['font.family'] = 'sans-serif'
+            plt.rcParams['font.sans-serif'] = [font_name, 'Noto Sans CJK JP', 'Noto Sans JP', 'DejaVu Sans']
+        except Exception as e:
+            # フォント登録に失敗した場合はフォールバック
+            plt.rcParams['font.family'] = 'sans-serif'
+            plt.rcParams['font.sans-serif'] = ['Noto Sans CJK JP', 'Noto Sans JP', 'DejaVu Sans', 'Arial']
     else:
-        # フォールバック設定
-        plt.rcParams['font.sans-serif'] = ['Noto Sans CJK JP', 'Noto Sans JP', 'DejaVu Sans']
+        # フォールバック設定（フォントファイルが見つからない場合）
+        plt.rcParams['font.family'] = 'sans-serif'
+        plt.rcParams['font.sans-serif'] = ['Noto Sans CJK JP', 'Noto Sans JP', 'DejaVu Sans', 'Arial']
 
     # その他の設定
     plt.rcParams['axes.unicode_minus'] = False
     plt.rcParams['figure.facecolor'] = 'white'
     plt.rcParams['axes.facecolor'] = 'white'
+    plt.rcParams['savefig.facecolor'] = 'white'
     plt.rcParams['pdf.fonttype'] = 42
     plt.rcParams['ps.fonttype'] = 42
+
+    # seabornのコンテキスト設定（フォントサイズなど）
+    sns.set_context("notebook", font_scale=1.1)
 
 # フォント設定を実行
 setup_japanese_font()
 
-# seabornのスタイル設定
-sns.set_style("whitegrid")
+# seabornのスタイル設定（日本語フォント対応）
+sns.set_style("whitegrid", {
+    'font.family': 'sans-serif',
+    'font.sans-serif': plt.rcParams['font.sans-serif'],
+})
 
 # カラーパレット
 COLORS = {
@@ -142,25 +144,19 @@ def plot_bayesian_distributions(
     ax1.legend(fontsize=10, loc='best', framealpha=0.9)
     ax1.grid(True, alpha=0.3, linestyle=':')
 
-    # 2. 差の分布のプロット
+    # 2. 差の分布のプロット（seabornベース）
     ax2 = fig.add_subplot(gs[2, :2])
 
     # サンプリング
     samples_a, samples_b = bayesian_test.sample_posterior()
     diff_samples = samples_b - samples_a
 
-    # ヒストグラムを描画
-    counts, bins, patches = ax2.hist(diff_samples, bins=80, density=True, alpha=0.7,
-                                     color=COLORS['credible'], edgecolor='white', linewidth=0.5)
+    # seabornのhistplotを使用（より美しく、日本語フォント対応が確実）
+    sns.histplot(diff_samples, bins=80, stat='density', alpha=0.6,
+                 color=COLORS['credible'], edgecolor='white', linewidth=0.5, ax=ax2)
 
-    # ゼロより大きい部分と小さい部分で色分け
-    for i, patch in enumerate(patches):
-        if bins[i] >= 0:
-            patch.set_facecolor(COLORS['positive'])
-            patch.set_alpha(0.6)
-        else:
-            patch.set_facecolor(COLORS['group_a'])
-            patch.set_alpha(0.6)
+    # 追加でKDEも表示
+    sns.kdeplot(diff_samples, color=COLORS['credible'], linewidth=2.5, ax=ax2, alpha=0.8)
 
     # 確信区間をハイライト
     ax2.axvline(result.diff_ci_lower, color=COLORS['credible'], linestyle='--',
@@ -467,7 +463,7 @@ def plot_comparison(
     fig = plt.figure(figsize=figsize)
     gs = fig.add_gridspec(2, 3, hspace=0.35, wspace=0.3)
 
-    # 1. 差の分布と信頼区間/確信区間の比較
+    # 1. 差の分布と信頼区間/確信区間の比較（seabornベース）
     ax1 = fig.add_subplot(gs[0, :2])
 
     # ベイジアンの差の分布をサンプリング
@@ -477,19 +473,13 @@ def plot_comparison(
                                bayesian_result.beta_post_b, 100000)
     diff_samples = samples_b - samples_a
 
-    # ヒストグラムを描画
-    counts, bins, patches = ax1.hist(diff_samples, bins=100, density=True, alpha=0.5,
-                                     color=COLORS['credible'], label='ベイジアン事後分布',
-                                     edgecolor='white', linewidth=0.5)
+    # seabornのhistplotとkdeplotを使用
+    sns.histplot(diff_samples, bins=100, stat='density', alpha=0.4,
+                 color=COLORS['credible'], label='ベイジアン事後分布',
+                 edgecolor='white', linewidth=0.5, ax=ax1)
 
-    # ゼロより大きい部分と小さい部分で色分け
-    for i, patch in enumerate(patches):
-        if bins[i] >= 0:
-            patch.set_facecolor(COLORS['positive'])
-            patch.set_alpha(0.5)
-        else:
-            patch.set_facecolor(COLORS['group_a'])
-            patch.set_alpha(0.5)
+    # KDEプロットを追加（より滑らかな分布表示）
+    sns.kdeplot(diff_samples, color=COLORS['credible'], linewidth=2.5, ax=ax1, alpha=0.7)
 
     # ベイジアンの確信区間
     y_max = ax1.get_ylim()[1]

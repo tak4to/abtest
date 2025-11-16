@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 import matplotlib.font_manager as fm
 import os
 
-# 日本語フォント設定（Streamlit Cloud対応）
+# 日本語フォント設定（Streamlit Cloud対応・改善版）
 @st.cache_resource
 def setup_japanese_font():
     """日本語フォントを設定する（キャッシュ付き）"""
@@ -24,6 +24,8 @@ def setup_japanese_font():
         '/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc',
         '/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc',
         '/usr/share/fonts/truetype/noto/NotoSansCJK-Bold.ttc',
+        '/System/Library/Fonts/ヒラギノ角ゴシック W4.ttc',  # macOS
+        'C:\\Windows\\Fonts\\msgothic.ttc',  # Windows
     ]
 
     font_file = None
@@ -32,25 +34,32 @@ def setup_japanese_font():
             font_file = font_path
             break
 
+    # matplotlibのフォント設定
     if font_file:
         try:
-            # フォントを直接登録
-            fm.fontManager.addfont(font_file)
+            # フォントを登録
+            if hasattr(fm.fontManager, 'addfont'):
+                fm.fontManager.addfont(font_file)
             font_prop = fm.FontProperties(fname=font_file)
             font_name = font_prop.get_name()
 
-            # matplotlibのデフォルトフォントとして設定
-            plt.rcParams['font.family'] = font_name
-            plt.rcParams['font.sans-serif'] = [font_name] + plt.rcParams['font.sans-serif']
+            # matplotlibの設定
+            plt.rcParams['font.family'] = 'sans-serif'
+            plt.rcParams['font.sans-serif'] = [font_name, 'Noto Sans CJK JP', 'Noto Sans JP', 'DejaVu Sans']
         except Exception as e:
-            # フォント登録に失敗した場合はフォールバックを使用
-            plt.rcParams['font.sans-serif'] = ['Noto Sans CJK JP', 'Noto Sans JP', 'DejaVu Sans']
+            # フォント登録に失敗した場合はフォールバック
+            plt.rcParams['font.family'] = 'sans-serif'
+            plt.rcParams['font.sans-serif'] = ['Noto Sans CJK JP', 'Noto Sans JP', 'DejaVu Sans', 'Arial']
     else:
-        # フォールバック設定
-        plt.rcParams['font.sans-serif'] = ['Noto Sans CJK JP', 'Noto Sans JP', 'DejaVu Sans']
+        # フォールバック設定（フォントファイルが見つからない場合）
+        plt.rcParams['font.family'] = 'sans-serif'
+        plt.rcParams['font.sans-serif'] = ['Noto Sans CJK JP', 'Noto Sans JP', 'DejaVu Sans', 'Arial']
 
     # その他の設定
     plt.rcParams['axes.unicode_minus'] = False
+    plt.rcParams['figure.facecolor'] = 'white'
+    plt.rcParams['axes.facecolor'] = 'white'
+    plt.rcParams['savefig.facecolor'] = 'white'
     plt.rcParams['pdf.fonttype'] = 42
     plt.rcParams['ps.fonttype'] = 42
 
