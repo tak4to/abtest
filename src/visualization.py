@@ -1,9 +1,11 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.font_manager as fm
 import seaborn as sns
 from scipy import stats
 from typing import Optional, Tuple
 import matplotlib.patches as mpatches
+import os
 
 from src.test_data import TestData
 from src.results import BayesianResult, FrequentistResult
@@ -11,13 +13,52 @@ from src.bayesian import BayesianABTest
 from src.frequentist import FrequentistABTest
 
 
+# 日本語フォント設定（Streamlit Cloud対応）
+def setup_japanese_font():
+    """日本語フォントを設定する"""
+    # Streamlit Cloud環境のフォントパスをチェック
+    font_paths = [
+        '/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc',
+        '/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc',
+    ]
+
+    font_found = False
+    for font_path in font_paths:
+        if os.path.exists(font_path):
+            font_prop = fm.FontProperties(fname=font_path)
+            plt.rcParams['font.family'] = font_prop.get_name()
+            font_found = True
+            break
+
+    if not font_found:
+        # フォールバック: システムフォントから検索
+        japanese_fonts = [
+            'Noto Sans CJK JP',
+            'Noto Sans JP',
+            'IPAexGothic',
+            'IPAPGothic',
+        ]
+
+        available_fonts = [f.name for f in fm.fontManager.ttflist]
+        for font_name in japanese_fonts:
+            if font_name in available_fonts:
+                plt.rcParams['font.family'] = font_name
+                font_found = True
+                break
+
+    if not font_found:
+        # 最終フォールバック
+        plt.rcParams['font.sans-serif'] = ['Noto Sans CJK JP', 'Noto Sans JP', 'DejaVu Sans']
+
+    plt.rcParams['axes.unicode_minus'] = False
+    plt.rcParams['figure.facecolor'] = 'white'
+    plt.rcParams['axes.facecolor'] = 'white'
+
+# フォント設定を実行
+setup_japanese_font()
+
 # seabornのスタイル設定
 sns.set_style("whitegrid")
-# 日本語フォント対応（複数のフォントを試行）
-plt.rcParams['font.sans-serif'] = ['Noto Sans CJK JP', 'Noto Sans JP', 'IPAexGothic', 'IPAPGothic', 'DejaVu Sans', 'Arial', 'sans-serif']
-plt.rcParams['axes.unicode_minus'] = False
-plt.rcParams['figure.facecolor'] = 'white'
-plt.rcParams['axes.facecolor'] = 'white'
 
 # カラーパレット
 COLORS = {
