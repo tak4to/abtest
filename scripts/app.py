@@ -172,24 +172,24 @@ else:  # カスタム
 # プリセット変更時に値を自動反映
 if 'previous_preset' not in st.session_state:
     st.session_state.previous_preset = preset
-    st.session_state.n_a = default_n_a
-    st.session_state.conv_a = default_conv_a
-    st.session_state.n_b = default_n_b
-    st.session_state.conv_b = default_conv_b
+    st.session_state.input_n_a = default_n_a
+    st.session_state.input_conv_a = min(default_conv_a, default_n_a)
+    st.session_state.input_n_b = default_n_b
+    st.session_state.input_conv_b = min(default_conv_b, default_n_b)
 
 if st.session_state.previous_preset != preset:
     st.session_state.previous_preset = preset
-    st.session_state.n_a = default_n_a
-    st.session_state.conv_a = default_conv_a
-    st.session_state.n_b = default_n_b
-    st.session_state.conv_b = default_conv_b
+    st.session_state.input_n_a = default_n_a
+    st.session_state.input_conv_a = min(default_conv_a, default_n_a)
+    st.session_state.input_n_b = default_n_b
+    st.session_state.input_conv_b = min(default_conv_b, default_n_b)
 
 # データ入力
 st.sidebar.subheader("🅰️ グループA (現行版)")
 n_a = st.sidebar.number_input(
     "サンプルサイズ (グループA)",
     min_value=1,
-    value=st.session_state.n_a,
+    value=st.session_state.get('input_n_a', default_n_a),
     step=1,
     key="input_n_a",
     help="グループAの訪問者数（例：Webサイトの訪問者数、広告の表示回数など）"
@@ -198,7 +198,7 @@ conv_a = st.sidebar.number_input(
     "コンバージョン数 (グループA)",
     min_value=0,
     max_value=int(n_a),
-    value=min(st.session_state.conv_a, int(n_a)),
+    value=min(st.session_state.get('input_conv_a', default_conv_a), int(n_a)),
     step=1,
     key="input_conv_a",
     help="グループAのコンバージョン数（例：購入数、クリック数など）"
@@ -208,7 +208,7 @@ st.sidebar.subheader("🅱️ グループB (新バージョン)")
 n_b = st.sidebar.number_input(
     "サンプルサイズ (グループB)",
     min_value=1,
-    value=st.session_state.n_b,
+    value=st.session_state.get('input_n_b', default_n_b),
     step=1,
     key="input_n_b",
     help="グループBの訪問者数（例：Webサイトの訪問者数、広告の表示回数など）"
@@ -217,17 +217,11 @@ conv_b = st.sidebar.number_input(
     "コンバージョン数 (グループB)",
     min_value=0,
     max_value=int(n_b),
-    value=min(st.session_state.conv_b, int(n_b)),
+    value=min(st.session_state.get('input_conv_b', default_conv_b), int(n_b)),
     step=1,
     key="input_conv_b",
     help="グループBのコンバージョン数（例：購入数、クリック数など）"
 )
-
-# ユーザーが値を変更した場合、session_stateを更新
-st.session_state.n_a = n_a
-st.session_state.conv_a = conv_a
-st.session_state.n_b = n_b
-st.session_state.conv_b = conv_b
 
 # 詳細設定
 with st.sidebar.expander("⚙️ 詳細設定"):
