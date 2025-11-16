@@ -8,11 +8,41 @@ sys.path.insert(0, str(root_dir))
 import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib
+import matplotlib.font_manager as fm
+import os
 
 # 日本語フォント設定（Streamlit Cloud対応）
-matplotlib.rcParams['font.family'] = 'Noto Sans CJK JP'
-plt.rcParams['axes.unicode_minus'] = False  # マイナス記号の文字化け対策
+def setup_japanese_font():
+    """日本語フォントを設定する"""
+    font_paths = [
+        '/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc',
+        '/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc',
+    ]
+
+    font_found = False
+    for font_path in font_paths:
+        if os.path.exists(font_path):
+            font_prop = fm.FontProperties(fname=font_path)
+            plt.rcParams['font.family'] = font_prop.get_name()
+            font_found = True
+            break
+
+    if not font_found:
+        japanese_fonts = ['Noto Sans CJK JP', 'Noto Sans JP', 'IPAexGothic', 'IPAPGothic']
+        available_fonts = [f.name for f in fm.fontManager.ttflist]
+        for font_name in japanese_fonts:
+            if font_name in available_fonts:
+                plt.rcParams['font.family'] = font_name
+                font_found = True
+                break
+
+    if not font_found:
+        plt.rcParams['font.sans-serif'] = ['Noto Sans CJK JP', 'Noto Sans JP', 'DejaVu Sans']
+
+    plt.rcParams['axes.unicode_minus'] = False
+
+# フォント設定を初期化
+setup_japanese_font()
 
 from src.test_data import TestData, TestMethod
 from src.bayesian import BayesianABTest
