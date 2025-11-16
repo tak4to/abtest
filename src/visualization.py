@@ -1,9 +1,13 @@
 import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
+import matplotlib.font_manager as fm
 import seaborn as sns
 from scipy import stats
 from typing import Optional, Tuple
 import matplotlib.patches as mpatches
+import os
+import shutil
 
 from src.test_data import TestData
 from src.results import BayesianResult, FrequentistResult
@@ -11,13 +15,64 @@ from src.bayesian import BayesianABTest
 from src.frequentist import FrequentistABTest
 
 
+# 日本語フォント設定（Streamlit Cloud対応）
+def setup_japanese_font():
+    """日本語フォントを設定する"""
+
+    # matplotlibのフォントキャッシュディレクトリをクリア（初回のみ）
+    cache_dir = matplotlib.get_cachedir()
+    if os.path.exists(cache_dir):
+        try:
+            # キャッシュが空でない場合のみクリア
+            if os.listdir(cache_dir):
+                shutil.rmtree(cache_dir)
+                fm._rebuild()
+        except:
+            pass
+
+    # 日本語フォントのパスを検索
+    font_paths = [
+        '/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc',
+        '/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc',
+        '/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc',
+        '/usr/share/fonts/truetype/noto/NotoSansCJK-Bold.ttc',
+    ]
+
+    font_file = None
+    for font_path in font_paths:
+        if os.path.exists(font_path):
+            font_file = font_path
+            break
+
+    if font_file:
+        # フォントを直接登録
+        try:
+            fm.fontManager.addfont(font_file)
+            font_prop = fm.FontProperties(fname=font_file)
+            font_name = font_prop.get_name()
+
+            # matplotlibのデフォルトフォントとして設定
+            plt.rcParams['font.family'] = font_name
+            plt.rcParams['font.sans-serif'] = [font_name] + plt.rcParams['font.sans-serif']
+        except:
+            # 既に登録済みの場合はスキップ
+            pass
+    else:
+        # フォールバック設定
+        plt.rcParams['font.sans-serif'] = ['Noto Sans CJK JP', 'Noto Sans JP', 'DejaVu Sans']
+
+    # その他の設定
+    plt.rcParams['axes.unicode_minus'] = False
+    plt.rcParams['figure.facecolor'] = 'white'
+    plt.rcParams['axes.facecolor'] = 'white'
+    plt.rcParams['pdf.fonttype'] = 42
+    plt.rcParams['ps.fonttype'] = 42
+
+# フォント設定を実行
+setup_japanese_font()
+
 # seabornのスタイル設定
 sns.set_style("whitegrid")
-# 日本語フォント対応（複数のフォントを試行）
-plt.rcParams['font.sans-serif'] = ['Noto Sans CJK JP', 'Noto Sans JP', 'IPAexGothic', 'IPAPGothic', 'DejaVu Sans', 'Arial', 'sans-serif']
-plt.rcParams['axes.unicode_minus'] = False
-plt.rcParams['figure.facecolor'] = 'white'
-plt.rcParams['axes.facecolor'] = 'white'
 
 # カラーパレット
 COLORS = {
