@@ -152,7 +152,7 @@ elif preset == "微妙な差がある例":
     default_n_a = 1000
     default_conv_a = 100
     default_n_b = 1000
-    default_conv_b = 115
+    default_conv_b = 125
 elif preset == "差がない例":
     default_n_a = 1000
     default_conv_a = 100

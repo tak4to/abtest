@@ -14,7 +14,7 @@ def clear_difference_data():
 @pytest.fixture
 def subtle_difference_data():
     """微妙な差があるテストデータ."""
-    return TestData(n_a=1000, conv_a=100, n_b=1000, conv_b=115)
+    return TestData(n_a=1000, conv_a=100, n_b=1000, conv_b=125)
 
 
 @pytest.fixture

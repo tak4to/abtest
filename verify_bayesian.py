@@ -42,7 +42,7 @@ else:
 
 # テストケース2: 微妙な差がある場合
 print("\n[テストケース2: 微妙な差がある場合]")
-data2 = TestData(n_a=1000, conv_a=100, n_b=1000, conv_b=115)
+data2 = TestData(n_a=1000, conv_a=100, n_b=1000, conv_b=125)
 print(f"グループA: {data2.n_a}訪問, {data2.conv_a}コンバージョン (CVR: {data2.cvr_a:.2%})")
 print(f"グループB: {data2.n_b}訪問, {data2.conv_b}コンバージョン (CVR: {data2.cvr_b:.2%})")
 
