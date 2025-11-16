@@ -12,23 +12,11 @@ matplotlib.use('Agg')  # バックエンドを明示的に設定
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as fm
 import os
-import shutil
 
 # 日本語フォント設定（Streamlit Cloud対応）
 @st.cache_resource
 def setup_japanese_font():
     """日本語フォントを設定する（キャッシュ付き）"""
-
-    # matplotlibのフォントキャッシュディレクトリをクリア
-    cache_dir = matplotlib.get_cachedir()
-    if os.path.exists(cache_dir):
-        try:
-            shutil.rmtree(cache_dir)
-        except:
-            pass
-
-    # フォントマネージャーをリビルド
-    fm._rebuild()
 
     # 日本語フォントのパスを検索
     font_paths = [
@@ -45,14 +33,18 @@ def setup_japanese_font():
             break
 
     if font_file:
-        # フォントを直接登録
-        fm.fontManager.addfont(font_file)
-        font_prop = fm.FontProperties(fname=font_file)
-        font_name = font_prop.get_name()
+        try:
+            # フォントを直接登録
+            fm.fontManager.addfont(font_file)
+            font_prop = fm.FontProperties(fname=font_file)
+            font_name = font_prop.get_name()
 
-        # matplotlibのデフォルトフォントとして設定
-        plt.rcParams['font.family'] = font_name
-        plt.rcParams['font.sans-serif'] = [font_name] + plt.rcParams['font.sans-serif']
+            # matplotlibのデフォルトフォントとして設定
+            plt.rcParams['font.family'] = font_name
+            plt.rcParams['font.sans-serif'] = [font_name] + plt.rcParams['font.sans-serif']
+        except Exception as e:
+            # フォント登録に失敗した場合はフォールバックを使用
+            plt.rcParams['font.sans-serif'] = ['Noto Sans CJK JP', 'Noto Sans JP', 'DejaVu Sans']
     else:
         # フォールバック設定
         plt.rcParams['font.sans-serif'] = ['Noto Sans CJK JP', 'Noto Sans JP', 'DejaVu Sans']
