@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as fm
 import seaborn as sns
@@ -6,6 +7,7 @@ from scipy import stats
 from typing import Optional, Tuple
 import matplotlib.patches as mpatches
 import os
+import shutil
 
 from src.test_data import TestData
 from src.results import BayesianResult, FrequentistResult
@@ -16,43 +18,55 @@ from src.frequentist import FrequentistABTest
 # 日本語フォント設定（Streamlit Cloud対応）
 def setup_japanese_font():
     """日本語フォントを設定する"""
-    # Streamlit Cloud環境のフォントパスをチェック
+
+    # matplotlibのフォントキャッシュディレクトリをクリア（初回のみ）
+    cache_dir = matplotlib.get_cachedir()
+    if os.path.exists(cache_dir):
+        try:
+            # キャッシュが空でない場合のみクリア
+            if os.listdir(cache_dir):
+                shutil.rmtree(cache_dir)
+                fm._rebuild()
+        except:
+            pass
+
+    # 日本語フォントのパスを検索
     font_paths = [
         '/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc',
         '/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc',
+        '/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc',
+        '/usr/share/fonts/truetype/noto/NotoSansCJK-Bold.ttc',
     ]
 
-    font_found = False
+    font_file = None
     for font_path in font_paths:
         if os.path.exists(font_path):
-            font_prop = fm.FontProperties(fname=font_path)
-            plt.rcParams['font.family'] = font_prop.get_name()
-            font_found = True
+            font_file = font_path
             break
 
-    if not font_found:
-        # フォールバック: システムフォントから検索
-        japanese_fonts = [
-            'Noto Sans CJK JP',
-            'Noto Sans JP',
-            'IPAexGothic',
-            'IPAPGothic',
-        ]
+    if font_file:
+        # フォントを直接登録
+        try:
+            fm.fontManager.addfont(font_file)
+            font_prop = fm.FontProperties(fname=font_file)
+            font_name = font_prop.get_name()
 
-        available_fonts = [f.name for f in fm.fontManager.ttflist]
-        for font_name in japanese_fonts:
-            if font_name in available_fonts:
-                plt.rcParams['font.family'] = font_name
-                font_found = True
-                break
-
-    if not font_found:
-        # 最終フォールバック
+            # matplotlibのデフォルトフォントとして設定
+            plt.rcParams['font.family'] = font_name
+            plt.rcParams['font.sans-serif'] = [font_name] + plt.rcParams['font.sans-serif']
+        except:
+            # 既に登録済みの場合はスキップ
+            pass
+    else:
+        # フォールバック設定
         plt.rcParams['font.sans-serif'] = ['Noto Sans CJK JP', 'Noto Sans JP', 'DejaVu Sans']
 
+    # その他の設定
     plt.rcParams['axes.unicode_minus'] = False
     plt.rcParams['figure.facecolor'] = 'white'
     plt.rcParams['axes.facecolor'] = 'white'
+    plt.rcParams['pdf.fonttype'] = 42
+    plt.rcParams['ps.fonttype'] = 42
 
 # フォント設定を実行
 setup_japanese_font()
