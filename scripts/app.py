@@ -8,6 +8,11 @@ sys.path.insert(0, str(root_dir))
 import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib
+
+# 日本語フォント設定（Streamlit Cloud対応）
+matplotlib.rcParams['font.family'] = 'Noto Sans CJK JP'
+plt.rcParams['axes.unicode_minus'] = False  # マイナス記号の文字化け対策
 
 from src.test_data import TestData, TestMethod
 from src.bayesian import BayesianABTest
