@@ -213,13 +213,13 @@ def plot_bayesian_distributions(
 
     # 判定結果
     if result.prob_b_better > 0.95:
-        conclusion = "✅ Bが優位"
+        conclusion = "Bが優位"
         conclusion_color = COLORS['group_b']
     elif result.prob_a_better > 0.95:
-        conclusion = "✅ Aが優位"
+        conclusion = "Aが優位"
         conclusion_color = COLORS['group_a']
     else:
-        conclusion = "⚖️ 判定不能"
+        conclusion = "判定不能"
         conclusion_color = COLORS['neutral']
 
     summary_text = f"""
@@ -369,10 +369,10 @@ def plot_frequentist_results(
 
     # 判定結果を表示
     if result.is_significant:
-        judgment = f"✅ 有意差あり\n(p < α)"
+        judgment = f"有意差あり\n(p < α)"
         judgment_color = COLORS['positive']
     else:
-        judgment = f"❌ 有意差なし\n(p ≥ α)"
+        judgment = f"有意差なし\n(p ≥ α)"
         judgment_color = COLORS['neutral']
 
     ax2.text(0.5, 0.95, judgment, transform=ax2.transAxes,
@@ -388,7 +388,7 @@ def plot_frequentist_results(
     pooled_p = (data.conv_a + data.conv_b) / (data.n_a + data.n_b)
     effect_size = data.cvr_diff / np.sqrt(pooled_p * (1 - pooled_p) * (1/data.n_a + 1/data.n_b))
 
-    significance_text = "✅ 有意" if result.is_significant else "❌ 非有意"
+    significance_text = "有意" if result.is_significant else "非有意"
     sig_color = COLORS['positive'] if result.is_significant else COLORS['neutral']
 
     summary_text = f"""
@@ -518,35 +518,28 @@ def plot_comparison(
     if bayesian_result.prob_b_better > 0.95:
         bayesian_conclusion = "Bが優位"
         bayesian_color = COLORS['group_b']
-        bayesian_symbol = "🔴"
     elif bayesian_result.prob_a_better > 0.95:
         bayesian_conclusion = "Aが優位"
         bayesian_color = COLORS['group_a']
-        bayesian_symbol = "🔵"
     else:
         bayesian_conclusion = "判定不能"
         bayesian_color = COLORS['neutral']
-        bayesian_symbol = "⚖️"
 
     # 頻度論的の結論
     if frequentist_result.is_significant:
         if data.cvr_b > data.cvr_a:
             freq_conclusion = "Bが優位"
             freq_color = COLORS['group_b']
-            freq_symbol = "🔴"
         else:
             freq_conclusion = "Aが優位"
             freq_color = COLORS['group_a']
-            freq_symbol = "🔵"
     else:
         freq_conclusion = "有意差なし"
         freq_color = COLORS['neutral']
-        freq_symbol = "⚖️"
 
     conclusions = ['ベイジアン', '頻度主義']
     results = [bayesian_conclusion, freq_conclusion]
     colors = [bayesian_color, freq_color]
-    symbols = [bayesian_symbol, freq_symbol]
 
     y_pos = np.arange(len(conclusions))
     bars = ax2.barh(y_pos, [1, 1], color=colors, alpha=0.7, edgecolor='white', linewidth=2)
@@ -562,8 +555,8 @@ def plot_comparison(
     ax2.spines['left'].set_visible(False)
 
     # 結論のテキストを表示
-    for i, (result, symbol) in enumerate(zip(results, symbols)):
-        ax2.text(0.5, i, f'{symbol} {result}', ha='center', va='center',
+    for i, result in enumerate(results):
+        ax2.text(0.5, i, f'{result}', ha='center', va='center',
                 fontsize=13, fontweight='bold', color='white')
 
     # 3. 主要メトリクスの比較（改善版）
@@ -623,13 +616,11 @@ def plot_comparison(
                 (bayesian_conclusion == "判定不能" and freq_conclusion == "有意差なし")
 
     if agreement:
-        agreement_text = "✅ 一致"
+        agreement_text = "一致"
         agreement_color = COLORS['positive']
-        agreement_icon = "👍"
     else:
-        agreement_text = "⚠️ 不一致"
+        agreement_text = "不一致"
         agreement_color = COLORS['highlight']
-        agreement_icon = "⚠️"
 
     summary_text = f"""
 比較サマリー
@@ -640,17 +631,17 @@ def plot_comparison(
   {bayesian_result.credible_level:.0%} 確信区間:
     [{bayesian_result.diff_ci_lower:+.4f},
      {bayesian_result.diff_ci_upper:+.4f}]
-  結論: {bayesian_symbol} {bayesian_conclusion}
+  結論: {bayesian_conclusion}
 
 【頻度主義】
   p値: {frequentist_result.p_value:.4f}
   {frequentist_result.confidence_level:.0%} 信頼区間:
     [{frequentist_result.ci_lower:+.4f},
      {frequentist_result.ci_upper:+.4f}]
-  結論: {freq_symbol} {freq_conclusion}
+  結論: {freq_conclusion}
 
 {'─' * 28}
-{agreement_icon} 結論の一致度: {agreement_text}
+結論の一致度: {agreement_text}
 
 【解釈のポイント】
 • ベイジアン: 確率的解釈
