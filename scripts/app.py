@@ -176,6 +176,15 @@ if 'previous_preset' not in st.session_state:
     st.session_state.input_conv_a = min(default_conv_a, default_n_a)
     st.session_state.input_n_b = default_n_b
     st.session_state.input_conv_b = min(default_conv_b, default_n_b)
+    # 事前分布パラメータもリセット（冪等性を保つため）
+    if "n_a" in st.session_state:
+        del st.session_state["n_a"]
+    if "conv_a" in st.session_state:
+        del st.session_state["conv_a"]
+    if "n_b" in st.session_state:
+        del st.session_state["n_b"]
+    if "conv_b" in st.session_state:
+        del st.session_state["conv_b"]
 
 if st.session_state.previous_preset != preset:
     st.session_state.previous_preset = preset
@@ -183,6 +192,15 @@ if st.session_state.previous_preset != preset:
     st.session_state.input_conv_a = min(default_conv_a, default_n_a)
     st.session_state.input_n_b = default_n_b
     st.session_state.input_conv_b = min(default_conv_b, default_n_b)
+    # 事前分布パラメータもリセット（冪等性を保つため）
+    if "n_a" in st.session_state:
+        del st.session_state["n_a"]
+    if "conv_a" in st.session_state:
+        del st.session_state["conv_a"]
+    if "n_b" in st.session_state:
+        del st.session_state["n_b"]
+    if "conv_b" in st.session_state:
+        del st.session_state["conv_b"]
 
 # データ入力
 st.sidebar.subheader("🅰️ グループA (現行版)")
